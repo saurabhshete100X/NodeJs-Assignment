@@ -1,50 +1,52 @@
 const userModel = require("../models/userModel")
-
+const jwt = require('jsonwebtoken')
 const { keyValue, objectValue } = require("../middleware/validator")
 
 
 const createUser = async function (req, res) {
     try {
 
-        // const nameRegex = /^[a-zA-Z\s]*$/
-        // const emailRegex = /^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/
-        // const mobileRegex = /^([6-9]\d{9})$/
-        // const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/
-        // const pincodeRegex = /^[1-9][0-9]{5}$/
+        const nameRegex = /^[a-z\s]+$/i
+        const emailRegex = /^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/
+        const mobileRegex = /^([6-9]\d{9})$/
+        const passwordRegex =  /^(?!.\s)[A-Za-z\d@$#!%?&]{8,15}$/
+        const pincodeRegex = /^[1-9][0-9]{6}$/
 
-        // let { title, name, email, phone, password, address } = req.body  // Destructuring
+        let { title, name, email, phone, password, address } = req.body  // Destructuring
 
-        // if (!keyValue(req.body)) return res.status(400).send({ status: false, msg: "Please Provide Details" })
+        if (!keyValue(req.body)) return res.status(400).send({ status: false, msg: "Please Provide Details" })
 
-        // if (!title) return res.status(400).send({ status: false, msg: "Please Provide Title" })
-        // let titles = ["Mr", "Mrs", "Miss"]
-        // if (!titles.includes(title)) return res.status(400).send({ status: false, msg: `Title should be among  ${titles}` })
-
-
-        // if (!name) return res.status(400).send({ status: false, msg: "Please Provide Name" })
-        // if (name.match(nameRegex)) return res.status(400).send({ status: false, msg: "Please Provide Valid Name" })
+        if (!title) return res.status(400).send({ status: false, msg: "Please Provide Title" })
+        let titles = ["Mr", "Mrs", "Miss"]
+        if (!titles.includes(title)) return res.status(400).send({ status: false, msg: `Title should be among  ${titles} or space is not allowed` })
 
 
-        // if (!phone) return res.status(400).send({ status: false, msg: "Please Provide Mobile" })
-        // if (phone.match(mobileRegex)) return res.status(400).send({ status: false, msg: "Please Provide Valid Mobile" })
+        if (!name) return res.status(400).send({ status: false, msg: "Please Provide Name" })
+        if (!nameRegex.test(name)) return res.status(400).send({ status: false, msg: "Please Provide Valid Name" })
 
 
-        // if (!email) return res.status(400).send({ status: false, msg: "Please Provide Email" })
-        // if (email.match(emailRegex)) return res.status(400).send({ status: false, msg: "Please Provide Valid Email" })
+        if (!phone) return res.status(400).send({ status: false, msg: "Please Provide Mobile" })
+        if (!phone.match(mobileRegex)) return res.status(400).send({ status: false, msg: "Please Provide Valid Mobile" })
+
+        let duplicatePhone = await userModel.findOne({ phone })
+        if (duplicatePhone) return res.status(400).send({ status: false, msg: "phone is already registered!" })
+
+        if (!email) return res.status(400).send({ status: false, msg: "Please Provide Email" })
+        if (!email.match(emailRegex)) return res.status(400).send({ status: false, msg: "Please Provide Valid Email" })
 
 
-        // let duplicateEmail = await userModel.findOne({ email })
-        // if (duplicateEmail) return res.status(400).send({ status: false, msg: "email is already registered!" })
+        let duplicateEmail = await userModel.findOne({ email })
+        if (duplicateEmail) return res.status(400).send({ status: false, msg: "email is already registered!" })
 
 
-        // if (!password) return res.status(400).send({ status: false, msg: "Please Provide Email" })
-        // if (password.match(passwordRegex)) return res.status(400).send({ status: false, msg: "Please Provide Valid Email" })
+        if (!password) return res.status(400).send({ status: false, msg: "Please Provide password" })
+        if (!password.match(passwordRegex)) return res.status(400).send({ status: false, msg: "Please Provide Valid password" })
 
 
-        // if (address) {              // Nested If used here
-        //     if (!keyValue(address)) return res.status(400).send({ status: false, msg: "Please enter your address!" })
-        //     if (address.pincode.match(pincodeRegex)) return res.status(400).send({ status: false, msg: "Please Provide Valid Pincode" })
-        // }
+        if (address) {              // Nested If used here
+            if (!keyValue(address)) return res.status(400).send({ status: false, msg: "Please enter your address!" })
+            if (address.pincode.match(pincodeRegex)) return res.status(400).send({ status: false, msg: "Please Provide Valid Pincode" })
+        }
 
         const userCreation = await userModel.create(req.body)
         res.status(201).send({ status: true, message: 'Success', data: userCreation })
@@ -55,4 +57,40 @@ const createUser = async function (req, res) {
 
 }
 
-module.exports = { createUser }  // Destructuring & Exporting
+
+const userLogin = async function (req, res) {
+    try {
+        data = req.body
+        userName = data.email
+        password = data.password
+
+        if (Object.keys(data).length == 0) {
+            return res.status(400).send({ status: false, msg: 'please enter data' })
+        }
+        if (!userName) {
+            return res.status(400).send({ status: false, msg: 'username is required' })
+        }
+        if (!password) {
+            return res.status(400).send({ status: false, msg: 'password is required' })
+        }
+        let user = await userModel.findOne({ email: userName, password: password })
+        if (!user) {
+            return res.status(400).send({ status: false, msg: 'username or password incorrect' })
+        }
+        let token = jwt.sign(
+            {
+                userId: user._id.toString(),
+                "iat": Math.floor(Date.now() / 1000),
+                "exp": Math.floor(Date.now() / 1000) + 10 * 60 * 60
+            },'project-3-group-36'
+
+        )
+        res.status(201).send({status: true, msg: 'token created successfully', data: token})
+
+    }catch(err){
+        return res.status(500).send({status: false, Error: err.message})
+    }
+}
+
+
+module.exports = { createUser, userLogin }  // Destructuring & Exporting
