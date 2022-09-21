@@ -9,7 +9,6 @@ const userSchema = new mongoose.Schema(
             enum: ["Mr","Mrs","Miss"],
             trim: true
         },
-
         name: {
             type: String,
             required: true,
@@ -22,14 +21,12 @@ const userSchema = new mongoose.Schema(
             trim: true
 
         },
-
         email: {
             type: String,
             required: true,
             unique: true,
             trim: true
         },
-
         password: {
             type: String,
             required: true,

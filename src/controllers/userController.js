@@ -9,7 +9,7 @@ const createUser = async function (req, res) {
         const nameRegex = /^[a-z\s]+$/i
         const emailRegex = /^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/
         const mobileRegex = /^([6-9]\d{9})$/
-        const passwordRegex =  /^(?!.\s)[A-Za-z\d@$#!%?&]{8,15}$/
+        const passwordRegex = /^(?!.\s)[A-Za-z\d@$#!%?&]{8,15}$/
         const pincodeRegex = /^[1-9][0-9]{6}$/
 
         let { title, name, email, phone, password, address } = req.body  // Destructuring
@@ -80,15 +80,15 @@ const userLogin = async function (req, res) {
         let token = jwt.sign(
             {
                 userId: user._id.toString(),
-                "iat": Math.floor(Date.now() / 1000),
-                "exp": Math.floor(Date.now() / 1000) + 10 * 60 * 60
-            },'project-3-group-36'
+                iat: Math.floor(Date.now() / 1000),
+                exp: Math.floor(Date.now() / 1000) + 10 * 60 * 60
+            }, 'project-3-group-36'
 
         )
-        res.status(201).send({status: true, msg: 'token created successfully', data: token})
+        res.status(201).send({ status: true, msg: 'token created successfully', data: token })
 
-    }catch(err){
-        return res.status(500).send({status: false, Error: err.message})
+    } catch (err) {
+        return res.status(500).send({ status: false, Error: err.message })
     }
 }
 
