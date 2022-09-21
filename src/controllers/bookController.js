@@ -1,20 +1,24 @@
 const bookModel = require("../models/bookModel")
+const userModel = require("../models/userModel")
 const mongoose = require("mongoose")
 
-const { keyValue } = require("../middleware/validator")    // IMPORTING VALIDATORS ( Destructuring Method )
-const ISBNRegex = /^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/
-const isValidDate = /^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/
+
+
 
 const createBooks = async function (req, res) {
     try {
+        const ISBNRegex = /^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/
+        const isValidDate = /^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/ // regex not work, deletedat date missing
         data = req.body
 
-        const { title, excerpt, userId, ISBN, category, subcategory, reviews, releasedAt } = data
+        const { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = data
 
-        if (!keyValue(data)) return res.status(400).send({ status: false, msg: "Please Provide Details" })
-        if (!title) return res.starus(400).send({ status: false, msg: "Please Provide Title" })
+        if (Object.keys(data).length == 0) return res.status(400).send({ status: false, msg: "Please Provide Details" })
+        if (!title) return res.status(400).send({ status: false, msg: "Please Provide Title" })
+        let duplicateTitle = await bookModel.findOne({ title })                                                    // DB Call
+        if (duplicateTitle) return res.status(400).send({ status: false, msg: "title is already registered!" })   // Duplicate Validation
         if (!excerpt) return res.status(400).send({ status: false, msg: "Please Provide Excerpt" })
-        if (!userId) return res.status(400).send({ status: false, msg: "Please Provide Excerpt" })
+        if (!userId) return res.status(400).send({ status: false, msg: "Please Provide userId" })
 
         if (!mongoose.Types.ObjectId.isValid(userId)) {                                                                // userId Validation
             return res.status(403).send({ status: false, msg: "Please Provide Valid userId" })
@@ -24,10 +28,8 @@ const createBooks = async function (req, res) {
         let duplicateISBN = await bookModel.findOne({ ISBN })                                                    // DB Call
         if (duplicateISBN) return res.status(400).send({ status: false, msg: "ISBN is already registered!" })   // Duplicate Validation
 
-
         if (!category) return res.status(400).send({ status: false, msg: "Please Provide Category" })
         if (!subcategory) return res.status(400).send({ status: false, msg: "Please Provide Subcategory" })
-        if (!reviews) return res.status(400).send({ status: false, msg: "Please Provide Reviews" })
         if (isValidDate.test(releasedAt)) return res.status(400).send({ status: false, msg: "Please enter releasedAt in the right format(YYYY/MM/DD)!" })
 
 
@@ -45,14 +47,15 @@ const getBooks = async function (req, res) {
         let data = req.query;
         const { userId, category, subcategory } = data
 
-        if (userId.length == 0) {
-            return res.status(404).send({ status: false, message: "userId should be present" })
+        if (Object.keys(data) == 0) {
+            let findBookwithoutfilter = await bookModel.find({ isDeleted: false })
+            return res.status(200).send({ status:true,data: findBookwithoutfilter })
         }
-        if (!mongoose.Types.ObjectId.isvalid(userId)) return res.status(400).send({ status: false, message: "userId is not valid" })
-
-        if (!category.length == 0) return res.status(400).send({ status: false, msg: "category must be present" })
-
-        if (!subcategory.length == 0) return res.status(400).send({ status: false, msg: "subcategory should be present" })
+        let user = await userModel.findById(userId)
+        if(!user){
+            return res.status(404).send({ status: false, message: 'user not found'})
+        }
+        if(!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "userId is not valid" })
 
         let alldata = { ...data, isDeleted: false }
 
@@ -106,4 +109,4 @@ const getallBooksById = async function (req, res) {
     }
 }
 
-module.exports = { createBooks,getBooks,getallBooksById } // Destructuring & Exporting
+module.exports = { createBooks, getBooks, getallBooksById } // Destructuring & Exporting

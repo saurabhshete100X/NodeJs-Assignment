@@ -1,6 +1,5 @@
 const userModel = require("../models/userModel")
 const jwt = require('jsonwebtoken')
-const { keyValue, objectValue } = require("../middleware/validator")
 
 
 const createUser = async function (req, res) {
@@ -14,7 +13,7 @@ const createUser = async function (req, res) {
 
         let { title, name, email, phone, password, address } = req.body  // Destructuring
 
-        if (!keyValue(req.body)) return res.status(400).send({ status: false, msg: "Please Provide Details" })
+        if (Object.keys(req.body).length == 0) return res.status(400).send({ status: false, msg: "Please Provide Details" })
 
         if (!title) return res.status(400).send({ status: false, msg: "Please Provide Title" })
         let titles = ["Mr", "Mrs", "Miss"]
@@ -44,7 +43,7 @@ const createUser = async function (req, res) {
 
 
         if (address) {              // Nested If used here
-            if (!keyValue(address)) return res.status(400).send({ status: false, msg: "Please enter your address!" })
+            if (Object.keys(address).length == 0) return res.status(400).send({ status: false, msg: "Please enter your address!" })
             if (address.pincode.match(pincodeRegex)) return res.status(400).send({ status: false, msg: "Please Provide Valid Pincode" })
         }
 
