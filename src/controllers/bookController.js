@@ -39,4 +39,71 @@ const createBooks = async function (req, res) {
     }
 }
 
-module.exports = { createBooks } // Destructuring & Exporting
+
+const getBooks = async function (req, res) {
+    try {
+        let data = req.query;
+        const { userId, category, subcategory } = data
+
+        if (userId.length == 0) {
+            return res.status(404).send({ status: false, message: "userId should be present" })
+        }
+        if (!mongoose.Types.ObjectId.isvalid(userId)) return res.status(400).send({ status: false, message: "userId is not valid" })
+
+        if (!category.length == 0) return res.status(400).send({ status: false, msg: "category must be present" })
+
+        if (!subcategory.length == 0) return res.status(400).send({ status: false, msg: "subcategory should be present" })
+
+        let alldata = { ...data, isDeleted: false }
+
+        const getallbooks = await bookModel.find(alldata).select({ title: 1, excerpt: 1, userId: 1, category: 1, reviews: 1, releasedAt: 1 });
+
+        if (getallbooks.length == 0) return res.status(404).send({ satus: false, message: "No book is found" })
+
+        getallbooks.sort()
+
+        return res.status(200).send({ status: true, message: 'Books list', data: getallbooks })
+
+
+    } catch (err) {
+        res.status(500).send({ status: false, msg: "server error", error: err.message })
+    }
+}
+
+// get all book by id
+
+const getallBooksById = async function (req, res) {
+
+    try {
+        let bookId = req.params.bookId
+
+        if (!mongoose.Types.ObjectId.isValid(bookId)) return res.satus(400).send({ satus: false, message: "bookId is not valid" })
+
+        let result = await bookModel.findOne({ _id: bookId, isDeleted: false })
+
+        if (!result) return res.satus(404).send({ status: false, message: "bookId does not Exist" })
+
+        let Book = result._id.toString();
+
+        const review = await reviweModel.find({ bookId: Book }).select({ _id: 1, bookId: 1, reviewedBy: 1, reviewedAt: 1, rating: 1, review: 1 })
+
+        responsedata = {
+            _id: result._id,
+            title: result.title,
+            excerpt: result.excerpt,
+            userId: result.userId,
+            category: result.category,
+            subcategory: result.subcategory,
+            isDeleted: result.isDeleted,
+            reviews: result.reviews,
+            releasedAt: result.releasedAt,
+            reviewsData: review
+        }
+        return res.status(200).send({ status: true, data: responsedata })
+    } catch (err) {
+        res.status(500).send({ status: false, msg: "server error", error: err.message })
+
+    }
+}
+
+module.exports = { createBooks,getBooks,getallBooksById } // Destructuring & Exporting
