@@ -1,7 +1,7 @@
 const bookModel = require("../models/bookModel")
 const userModel = require("../models/userModel")
 const mongoose = require("mongoose")
-const reviweModel = require("../models/reviewModel")
+const reviweModel= require("../models/reviewModel")
 
 
 
@@ -9,10 +9,10 @@ const reviweModel = require("../models/reviewModel")
 const createBooks = async function (req, res) {
     try {
         const ISBNRegex = /^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/
-        const isValidDate = /^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/ // regex not work, deletedat date missing
+        const isValidDate = /^\d{4}\--(0[1-9]|1[012])\--(0[1-9]|[12][0-9]|3[01])$/ 
         data = req.body
 
-        const { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = data
+        const  { title, excerpt, userId, ISBN, category, subcategory, releasedAt,isDeleted } = data
 
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, msg: "Please Provide Details" })
         if (!title) return res.status(400).send({ status: false, msg: "Please Provide Title" })
@@ -32,13 +32,15 @@ const createBooks = async function (req, res) {
         if (!category) return res.status(400).send({ status: false, msg: "Please Provide Category" })
         if (!subcategory) return res.status(400).send({ status: false, msg: "Please Provide Subcategory" })
         if (isValidDate.test(releasedAt)) return res.status(400).send({ status: false, msg: "Please enter releasedAt in the right format(YYYY/MM/DD)!" })
-
+        if(isDeleted === true){
+                data.deletedAt = new Date()
+        }
 
         const bookCreation = await bookModel.create(data)
         res.status(201).send({ status: true, msg: "Book Created Successfully", data: bookCreation })
 
     } catch (error) {
-        res.status(500).send({ status: false, msg: error.msg })
+        res.status(500).send({ status: false, error: error.message })
     }
 }
 
@@ -46,25 +48,23 @@ const createBooks = async function (req, res) {
 const getBooks = async function (req, res) {
     try {
         let data = req.query;
-
+         
         if (Object.keys(data).length == 0) {
-            let findBookwithoutfilter = await bookModel.find({ isDeleted: false })
-            return res.status(200).send({ status: true, data: findBookwithoutfilter })
-        }
-        if (data.userId) {
+            let findBookwithoutfilter = await bookModel.find({ isDeleted: false }).select({ title: 1, excerpt: 1, userId: 1, category: 1, reviews: 1, releasedAt: 1 }).sort({title:1})
+            return res.status(200).send({ status:true,data: findBookwithoutfilter })
+        } 
+          if(data.userId){
 
-            if (!mongoose.isValidObjectId(data.userId)) return res.status(400).send({ status: false, message: "userId is not valid" })
+        if(!mongoose.isValidObjectId(data.userId)) return res.status(400).send({ status: false, message: "userId is not valid" })
+          
+        let alluser = await userModel.findById(data.userId)
 
-            let alluser = await userModel.findById(data.userId)
-
-            if (!alluser) return res.status(404).send({ status: false, msg: "user not found" })
-
-        }
-
-
-        const allbooks = { ...data, isDeleted: false }
-
-        const getallbooks = await bookModel.find(allbooks).select({ title: 1, excerpt: 1, userId: 1, category: 1, reviews: 1, releasedAt: 1 }).sort({ title: 1 })
+        if(!alluser)return res.status(404).send({status:false, msg:"user not found"})
+    
+       }
+          const allbooks = {...data,isDeleted:false}
+          
+        const getallbooks = await bookModel.find(allbooks).select({ title: 1, excerpt: 1, userId: 1, category: 1, reviews: 1, releasedAt: 1 }).sort({title:1})
 
         if (getallbooks.length == 0) return res.status(404).send({ satus: false, message: "No book is found" })
 
@@ -72,7 +72,7 @@ const getBooks = async function (req, res) {
 
 
     } catch (err) {
-        res.status(500).send({ status: false, msg: "server error", error: err.message })
+        return res.status(500).send({ status: false, msg: "server error", error: err.message })
     }
 }
 
@@ -82,14 +82,17 @@ const getallBooksById = async function (req, res) {
 
     try {
         let bookId = req.params.bookId
+         
+        if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ satus: false, message: "bookId is not valid" })
 
-        if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ status: false, message: "userId is not valid" })
+        let allbook = await bookModel.findById(bookId)
+        if(!allbook)return res.status(404).send({satus:false, msg:"book not found"})
 
         let result = await bookModel.findOne({ _id: bookId, isDeleted: false })
 
-        if (!result) return res.satus(404).send({ status: false, message: "bookId does not Exist" })
+        if (!result) return res.status(404).send({ status: false, message: "bookId does not Exist" })
 
-        let Book = result._id.toString();
+        let Book = result._id;
 
         const review = await reviweModel.find({ bookId: Book }).select({ _id: 1, bookId: 1, reviewedBy: 1, reviewedAt: 1, rating: 1, review: 1 })
 
@@ -112,4 +115,4 @@ const getallBooksById = async function (req, res) {
     }
 }
 
-module.exports = { createBooks, getBooks, getallBooksById } // Destructuring & Exporting
+module.exports = { createBooks, getBooks, getallBooksById }
