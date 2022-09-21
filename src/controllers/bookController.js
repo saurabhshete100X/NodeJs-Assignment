@@ -1,6 +1,7 @@
 const bookModel = require("../models/bookModel")
 const userModel = require("../models/userModel")
 const mongoose = require("mongoose")
+const reviweModel= require("../models/reviewModel")
 
 
 
@@ -45,25 +46,27 @@ const createBooks = async function (req, res) {
 const getBooks = async function (req, res) {
     try {
         let data = req.query;
-        const { userId, category, subcategory } = data
-
-        if (Object.keys(data) == 0) {
+         
+        if (Object.keys(data).length == 0) {
             let findBookwithoutfilter = await bookModel.find({ isDeleted: false })
             return res.status(200).send({ status:true,data: findBookwithoutfilter })
-        }
-        let user = await userModel.findById(userId)
-        if(!user){
-            return res.status(404).send({ status: false, message: 'user not found'})
-        }
-        if(!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "userId is not valid" })
+        } 
+          if(data.userId){
 
-        let alldata = { ...data, isDeleted: false }
+        if(!mongoose.isValidObjectId(data.userId)) return res.status(400).send({ status: false, message: "userId is not valid" })
+          
+        let alluser = await userModel.findById(data.userId)
 
-        const getallbooks = await bookModel.find(alldata).select({ title: 1, excerpt: 1, userId: 1, category: 1, reviews: 1, releasedAt: 1 });
+        if(!alluser)return res.status(404).send({status:false, msg:"user not found"})
+    
+       }
+       
+
+          const allbooks = {...data,isDeleted:false}
+          
+        const getallbooks = await bookModel.find(allbooks).select({ title: 1, excerpt: 1, userId: 1, category: 1, reviews: 1, releasedAt: 1 }).sort({title:1})
 
         if (getallbooks.length == 0) return res.status(404).send({ satus: false, message: "No book is found" })
-
-        getallbooks.sort()
 
         return res.status(200).send({ status: true, message: 'Books list', data: getallbooks })
 
