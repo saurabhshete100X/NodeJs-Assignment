@@ -9,20 +9,18 @@ const authentication = async function (req, res, next) {
         if (!token) {
             return res.status(401).send({ status: false, msg: 'token is mandatory' })
         }
-
-        let decodedToken = jwt.verify(token, 'project-3-group-36')
-        if (!decodedToken) {
-            return res.status(401).send({ status: false, msg: 'token is invalid' })
-        } else {
-            req.loggedInAuthorId = decodedToken._id
-            next()
-        }
-
+        let decodedToken = jwt.verify(token, 'project-3-group-36', function (error, decodedToken) {
+            if (error) {
+                return res.status(401).send({ status: false, msg: 'token is invalid' })
+            } else {
+                req.loggedInUserId = decodedToken._id
+                next()
+            }
+        })
     } catch (err) {
         return res.status(500).send({ status: false, Error: err.message })
     }
 }
-
 
 
 const authorisation = async function (req, res, next) {
@@ -30,15 +28,14 @@ const authorisation = async function (req, res, next) {
 
         let bookId = req.params.bookId
         if (!mongoose.Types.ObjectId.isValid(bookId)) {
-            return res.status(403).send({ status: false, msg: 'book id is not valid' })
+            return res.status(400).send({ status: false, msg: 'book id is not valid' })
         }
-
-        let book = await bookModel.findById({ _Id: bookId })
+        let book = await bookModel.findById({ _id: bookId })
         if (!book) {
             return res.status(404).send({ status: false, msg: 'book id does not exist' })
         }
-        if (book.userId != req.loggedInAuthorId) {
-            return res.status(404).send({ status: false, msg: 'user loggedIn is not allowed' })
+        if (book.userId != req.loggedInUserId) {
+            return res.status(403).send({ status: false, msg: 'user is not allowed to modified the book document' })
         }
         else {
             next()
@@ -50,4 +47,4 @@ const authorisation = async function (req, res, next) {
 }
 
 
-module.exports = {authentication, authorisation}
+module.exports = { authentication, authorisation }

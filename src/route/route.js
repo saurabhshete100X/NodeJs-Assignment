@@ -2,7 +2,7 @@ const express = require('express')
 const route = express.Router()
 const {createUser, userLogin} = require("../controllers/userController")
 const {createBooks, getBooks, getallBooksById} = require("../controllers/bookController")
-//const {authorisation} = require('../middleware/auth')
+//const {authentication, authorisation} = require('../middleware/auth')
 
 route.post("/register" , createUser)
 
