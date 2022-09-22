@@ -118,56 +118,57 @@ const getallBooksById = async function (req, res) {
 // ***********************************************put api************************************************************************8
 
 const updatedocutment = async function (req, res) {
+    try {
 
-    const isValidDate = /^\d{4}-\d{2}-\d{2}$/
+        const isValidDate = /^\d{4}-\d{2}-\d{2}$/
 
-    bookId = req.params.bookId
+        const bodydata = req.body
+        let bookId = req.params.bookId
 
-    if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ status: false, message: "please provide valid bookId" })
+        const { title, excerpt, releasedAt, ISBN } = bodydata
 
-    let nodata = await bookModel.findOne({ _id: bookId, isDeleted: false })
-    if (!nodata) return res.status(404).send({ satus: false, msg: "no books found" })
+        if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ status: false, message: "please provide valid bookId" })
+        if (Object.keys(bodydata).length == 0) return res.status(400).send({ satus: false, msg: "for updation data is required" })
 
-    const bodydata = req.body
+        if (!(title || excerpt || releasedAt || ISBN)) {
+            return res.status(400).send({ satus: false, message: "only update title, excerpt, releasedAt, ISBN" })
+        }
+        let noData = await bookModel.findOne({ _id: bookId, isDeleted: false })
+        if (!noData) return res.status(404).send({ satus: false, msg: "no books found" })
 
-    if (Object.keys(bodydata).length == 0) return res.status(400).send({ satus: false, msg: "for updation data is required" })
+        let duplicateTitle = await bookModel.findOne({ title })
+        if (duplicateTitle) return res.status(400).send({ status: false, msg: "title is already registered!" })
 
-    const { title, excerpt, releasedAt, ISBN } = bodydata
+        let duplicateISBN = await bookModel.findOne({ ISBN })
+        if (duplicateISBN) return res.status(400).send({ status: false, msg: "ISBN is already registered!" })
 
-    let duplicateTitle = await bookModel.findOne({ title })
-    if (duplicateTitle) return res.status(400).send({ status: false, msg: "title is already registered!" })
+        if (isValidDate.test(releasedAt)) return res.status(400).send({ status: false, msg: "Please enter releasedAt in the right format(YYYY-MM-DD)!" })
 
-    let duplicateISBN = await bookModel.findOne({ ISBN })
-    if (duplicateISBN) return res.status(400).send({ status: false, msg: "ISBN is already registered!" })
+        const updateBook = await bookModel.findByIdAndUpdate({ _id: noData._id }, { $set: bodydata }, { new: true })
 
-    if (isValidDate.test(releasedAt)) return res.status(400).send({ status: false, msg: "Please enter releasedAt in the right format(YYYY-MM-DD)!" })
+        return res.status(200).send({ satus: false, message: "book updated sucessfully", data: updateBook })
 
-
-    const updateBook = await bookModel.findByIdAndUpdate({ _id: nodata._id }, { $set: bodydata }, { new: true })
-
-    return res.status(200).send({ satus: false, message: "book updated sucessfully", data: updateBook })
-
-
-
+    } catch (err) {
+        return res.status(500).send({ status: false, msg: "server error", Error: err.message })
+    }
 }
 // ************************************************delete by id*****************************************************************
 
 const deletebook = async function (req, res) {
-    try{
-    bookId = req.params.bookId
+    try {
+        bookId = req.params.bookId
 
-    if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ satus: false, msg: "provide valid object Id" })
+        if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ satus: false, msg: "provide valid object Id" })
 
+        let dbcall = await bookModel.findOne({ _id: bookId, isDeleted: false })
+        if (!dbcall) return res.status(404).send({ satus: false, msg: "no books found" })
 
-    let dbcall = await bookModel.findOne({ _id: bookId, isDeleted: false })
-    if (!dbcall) return res.status(404).send({ satus: false, msg: "no books found" })
+        updateBook = await bookModel.findOneAndUpdate({ _id: bookId }, { isDeleted: true, deletedAt: new Date() }, { new: true })
 
-    updateBook = await bookModel.findOneAndUpdate({ _id: bookId }, { isDeleted: true, deletedAt: new Date() }, { new: true })
-
-    return res.status(200).send({ status: true, message: "data deleted sucessfully" })
+        return res.status(200).send({ status: true, message: "data deleted sucessfully" })
+    }
+    catch (err) {
+        return res.status(500).send({ status: false, msg: "server error", error: err.message })
+    }
 }
-catch(err){
-    return res.status(500).send({status:false,msg:"server error", error:err.message})
-}
-}
-module.exports = { createBooks, getBooks, getallBooksById, updatedocutment,deletebook }
+module.exports = { createBooks, getBooks, getallBooksById, updatedocutment, deletebook }
