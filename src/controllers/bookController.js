@@ -124,7 +124,7 @@ const getallBooksById = async function (req, res) {
 const updatedocutment = async function (req, res) {
     try {
 
-        const isValidDate = /^\d{4}-\d{2}-\d{2}$/
+        const isValidDate = /^\d{4}\--(0[1-9]|1[012])\--(0[1-9]|[12][0-9]|3[01])$/
 
         const bodydata = req.body
         let bookId = req.params.bookId
