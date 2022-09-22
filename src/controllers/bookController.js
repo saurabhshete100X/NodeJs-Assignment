@@ -130,6 +130,21 @@ const updatedocutment = async function (req, res) {
         let bookId = req.params.bookId
 
         const { title, excerpt, releasedAt, ISBN } = bodydata
+        
+        let obj = {}
+
+        if(bodydata.title){
+            obj.title = title
+        }
+        if(bodydata.excerpt){
+            obj.excerpt = excerpt
+        }
+        if(bodydata.releasedAt){
+            obj.releasedAt = releasedAt
+        }
+        if(bodydata.ISBN){
+            obj.ISBN = ISBN
+        }
 
         if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ status: false, message: "please provide valid bookId" })
         if (Object.keys(bodydata).length == 0) return res.status(400).send({ satus: false, msg: "for updation data is required" })
@@ -148,7 +163,7 @@ const updatedocutment = async function (req, res) {
 
         if (isValidDate.test(releasedAt)) return res.status(400).send({ status: false, msg: "Please enter releasedAt in the right format(YYYY-MM-DD)!" })
 
-        const updateBook = await bookModel.findByIdAndUpdate({ _id: noData._id }, { $set: bodydata }, { new: true })
+        const updateBook = await bookModel.findByIdAndUpdate({ _id: noData._id }, { $set: obj }, { new: true })
 
         return res.status(200).send({ satus: false, message: "book updated sucessfully", data: updateBook })
 
