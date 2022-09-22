@@ -46,16 +46,20 @@ const createBooks = async function (req, res) {
 const getBooks = async function (req, res) {
     try {
         let data = req.query;
-
+   
+          const {userId,category,subcategory} = data
         if (Object.keys(data).length == 0) {
             let findBookwithoutfilter = await bookModel.find({ isDeleted: false }).select({ title: 1, excerpt: 1, userId: 1, category: 1, reviews: 1, releasedAt: 1 }).sort({ title: 1 })
             return res.status(200).send({ status: true, data: findBookwithoutfilter })
         }
-        if (data.userId) {
+        if (!(userId || category || subcategory )) {
+            return res.status(400).send({ satus: false, message: "provide valid filters" })
+        }
+        if (userId) {
+            
+            if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "userId is not valid" })
 
-            if (!mongoose.isValidObjectId(data.userId)) return res.status(400).send({ status: false, message: "userId is not valid" })
-
-            let alluser = await userModel.findById(data.userId)
+            let alluser = await userModel.findById(userId)
 
             if (!alluser) return res.status(404).send({ status: false, msg: "user not found" })
 
@@ -135,7 +139,7 @@ const updatedocutment = async function (req, res) {
         }
         let noData = await bookModel.findOne({ _id: bookId, isDeleted: false })
         if (!noData) return res.status(404).send({ satus: false, msg: "no books found" })
-
+        
         let duplicateTitle = await bookModel.findOne({ title })
         if (duplicateTitle) return res.status(400).send({ status: false, msg: "title is already registered!" })
 
