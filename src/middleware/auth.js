@@ -34,8 +34,8 @@ const authorisation = async function (req, res, next) {
         if (!book) {
             return res.status(404).send({ status: false, msg: 'book id does not exist' })
         }
-        if (book.userId != req.loggedInUserId) {
-            return res.status(403).send({ status: false, msg: 'user is not allowed to modified the book document' })
+        if (book.userId != req.loggedInAuthorId) {
+            return res.status(404).send({ status: false, msg: 'user is not allowed to modified the book document' })
         }
         else {
             next()
