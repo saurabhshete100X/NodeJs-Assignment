@@ -23,12 +23,12 @@ const authentication = async function (req, res, next) {
     }
 }
 
-const authorisation1 = async function (req,res,next){
+const authorisation1 = async function (req, res, next) {
     try {
         data = req.body
         const userId = data.userId
 
-        if(Object.keys(data).length==0 )return res.status(400).send({status:false,msg:"body required"})
+        if (Object.keys(data).length == 0) return res.status(400).send({ status: false, msg: "body required" })
 
         if (!mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).send({ status: false, msg: 'user id is not valid' })
@@ -38,16 +38,16 @@ const authorisation1 = async function (req,res,next){
             return res.status(404).send({ status: false, msg: 'book id does not exist' })
         }
 
-        if(req.loggedInUserId != userById._id){
-          return res.status(403).send({status:false,msg:"user unauthorised"})
+        if (req.loggedInUserId != userById._id) {
+            return res.status(403).send({ status: false, msg: "user unauthorised" })
         }
 
-      next()
+        next()
 
 
 
     } catch (err) {
-        return res.status(500).send({status:false,msg:"server error",error:err.message})
+        return res.status(500).send({ status: false, msg: "server error", error: err.message })
     }
 }
 
@@ -76,4 +76,4 @@ const authorisation2 = async function (req, res, next) {
 }
 
 
-module.exports = { authentication, authorisation1,authorisation2 }
+module.exports = { authentication, authorisation1, authorisation2 }
