@@ -160,14 +160,14 @@ const updatedocutment = async function (req, res) {
 
 const deletebook = async function (req, res) {
     try {
-        bookId = req.params.bookId
+        const  bookId = req.params.bookId
 
         if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ satus: false, msg: "provide valid object Id" })
 
         let dbcall = await bookModel.findOne({ _id: bookId, isDeleted: false })
         if (!dbcall) return res.status(404).send({ satus: false, msg: "no books found" })
 
-        updateBook = await bookModel.findOneAndUpdate({ _id: bookId }, { isDeleted: true, deletedAt: new Date() }, { new: true })
+         const updateBook = await bookModel.findOneAndUpdate({ _id: bookId }, { isDeleted: true, deletedAt: new Date() }, { new: true })
 
         return res.status(200).send({ status: true, message: "data deleted sucessfully" })
     }
