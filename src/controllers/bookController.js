@@ -7,7 +7,7 @@ const reviweModel = require("../models/reviewModel")
 const createBooks = async function (req, res) {
     try {
         const ISBNRegex = /^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/
-        const isValidDate = /^\d{4}\--(0[1-9]|1[012])\--(0[1-9]|[12][0-9]|3[01])$/
+        const isValidDate = /^\d{4}--(0[1-9]|1[012])--(0[1-9]|[12][0-9]|3[01])$/
         data = req.body
 
         const { title, excerpt, userId, ISBN, category, subcategory, releasedAt, isDeleted } = data
@@ -53,7 +53,7 @@ const getBooks = async function (req, res) {
             return res.status(200).send({ status: true, data: findBookwithoutfilter })
         }
         if (!(userId || category || subcategory )) {
-            return res.status(400).send({ satus: false, message: "provide valid filters" })
+            return res.status(400).send({ satus: false, message: "Please Provide Only userId,Category,Subcategory" })
         }
         if (userId) {
             
@@ -124,25 +124,25 @@ const getallBooksById = async function (req, res) {
 const updatedocutment = async function (req, res) {
     try {
 
+        const ISBNRegex = /^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/
         const isValidDate = /^\d{4}\--(0[1-9]|1[012])\--(0[1-9]|[12][0-9]|3[01])$/
 
         const bodydata = req.body
         let bookId = req.params.bookId
 
         const { title, excerpt, releasedAt, ISBN } = bodydata
-        
         let obj = {}
 
-        if(bodydata.title){
+        if(title){
             obj.title = title
         }
-        if(bodydata.excerpt){
+        if(excerpt){
             obj.excerpt = excerpt
         }
-        if(bodydata.releasedAt){
+        if(releasedAt){
             obj.releasedAt = releasedAt
         }
-        if(bodydata.ISBN){
+        if(ISBN){
             obj.ISBN = ISBN
         }
 
@@ -158,12 +158,14 @@ const updatedocutment = async function (req, res) {
         let duplicateTitle = await bookModel.findOne({ title })
         if (duplicateTitle) return res.status(400).send({ status: false, msg: "title is already registered!" })
 
+
         let duplicateISBN = await bookModel.findOne({ ISBN })
         if (duplicateISBN) return res.status(400).send({ status: false, msg: "ISBN is already registered!" })
+        if (!ISBNRegex.test(ISBN)) return res.status(400).send({ status: false, msg: "Please enter Valid ISBN!" })
 
         if (isValidDate.test(releasedAt)) return res.status(400).send({ status: false, msg: "Please enter releasedAt in the right format(YYYY-MM-DD)!" })
 
-        const updateBook = await bookModel.findByIdAndUpdate({ _id: noData._id }, { $set: obj }, { new: true })
+        const updateBook = await bookModel.findByIdAndUpdate({ _id: noData._id }, { $set: obj }, { new: true })  //*//
 
         return res.status(200).send({ satus: false, message: "book updated sucessfully", data: updateBook })
 
