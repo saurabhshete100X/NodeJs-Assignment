@@ -158,7 +158,6 @@ const updatedocutment = async function (req, res) {
         let duplicateTitle = await bookModel.findOne({ title })
         if (duplicateTitle) return res.status(400).send({ status: false, msg: "title is already registered!" })
 
-
         let duplicateISBN = await bookModel.findOne({ ISBN })
         if (duplicateISBN) return res.status(400).send({ status: false, msg: "ISBN is already registered!" })
         if (!ISBNRegex.test(ISBN)) return res.status(400).send({ status: false, msg: "Please enter Valid ISBN!" })
