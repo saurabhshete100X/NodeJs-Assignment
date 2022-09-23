@@ -34,13 +34,13 @@ const createreviwe = async function (req, res) {
   result.reviewedBy = reviewedBy
 
   if (isDeleted) {
-    if (typeof isDeleted !== "boolean"|| value.trim().length === 0) {
+    if (typeof isDeleted !== "boolean") {
       return res.status(400).send({ status: false, msg: "isDeleted type must be boolean" })
     }
     result.isDeleted = isDeleted
   }
 
-  if (typeof rating != "number"||value.trim().length === 0) return res.status(400).send({ status: false, msg: "rating shoud be in number only" })
+  if (typeof rating != "number") return res.status(400).send({ status: false, msg: "rating shoud be in number only" })
 
   if (rating < 1 || rating > 5) return res.status(400).send({ status: false, msg: "rating should be between 1 to 5" })
 
