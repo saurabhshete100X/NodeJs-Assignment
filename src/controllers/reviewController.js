@@ -34,13 +34,13 @@ const createreviwe = async function (req, res) {
   result.reviewedBy = reviewedBy
 
   if (isDeleted) {
-    if (typeof isDeleted !== "boolean") {
+    if (typeof isDeleted !== "boolean"|| value.trim().length === 0) {
       return res.status(400).send({ status: false, msg: "isDeleted type must be boolean" })
     }
     result.isDeleted = isDeleted
   }
 
-  if (typeof rating != "number") return res.status(400).send({ status: false, msg: "rating shoud be in number only" })
+  if (typeof rating != "number"||value.trim().length === 0) return res.status(400).send({ status: false, msg: "rating shoud be in number only" })
 
   if (rating < 1 || rating > 5) return res.status(400).send({ status: false, msg: "rating should be between 1 to 5" })
 
@@ -58,9 +58,8 @@ const createreviwe = async function (req, res) {
     const updatebook = await bookModel.findOneAndUpdate(
       { _id: createdreviews.bookId, isDeleted: false }, { $inc: { reviews: 1 } }, { new: true }
     )
-    updatebook.responDate = findcr
-
-    return res.status(201).send({ status: true, message: "Success", data: updatebook })
+         
+    return res.status(201).send({ status: true, message: "Success", data: findcr })
   }
 
 }
@@ -96,7 +95,7 @@ const updatereviews = async function (req, res) {
       result.reviewedBy = reviewedBy
     }
     if (rating) {
-      if (typeof rating != "number") return res.status(400).send({ status: false, msg: "rating shoud be in number only" })
+      if (typeof rating != "number"||value.trim().length === 0) return res.status(400).send({ status: false, msg: "rating shoud be in number only" })
 
       if (rating < 1 || rating > 5) return res.status(400).send({ status: false, msg: "rating should be between 1 to 5" })
 
@@ -110,11 +109,9 @@ const updatereviews = async function (req, res) {
 
     const updateReview = await reviewModel.findByIdAndUpdate({ _id: reviewId }, { $set: result }, { new: true }).select({ _id: 1, bookId: 1, reviewedBy: 1, reviewedAt: 1, rating: 1, review: 1 });
 
-    if (updateReview) {
-      existbook.responData = updateReview
-
-      return res.status(200).send({ status: true, message: "Success", data: existbook });
-    }
+    
+      return res.status(200).send({ status: true, message: "Success", data: updateReview });
+    
 
   }
   catch (err) {
