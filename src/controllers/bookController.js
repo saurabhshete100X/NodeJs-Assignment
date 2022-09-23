@@ -13,7 +13,7 @@ const createBooks = async function (req, res) {
 
         const { title, excerpt, userId, ISBN, category, subcategory, releasedAt, isDeleted } = data
 
-        if (Object.keys(data).length == 0) return res.status(400).send({ status: false, msg: "Please Provide Details" })
+        if (Object.keys(data).length === 0) return res.status(400).send({ status: false, msg: "Please Provide Details" })
         if (!title) return res.status(400).send({ status: false, msg: "Please Provide Title" })
         let duplicateTitle = await bookModel.findOne({ title })                                                    // DB Call
         if (duplicateTitle) return res.status(400).send({ status: false, msg: "title is already registered!" })   // Duplicate Validation
