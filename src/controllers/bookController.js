@@ -160,7 +160,7 @@ const updatedocutment = async function (req, res) {
 
         let duplicateISBN = await bookModel.findOne({ ISBN })
         if (duplicateISBN) return res.status(400).send({ status: false, msg: "ISBN is already registered!" })
-        if (!ISBNRegex.test(ISBN)) return res.status(400).send({ status: false, msg: "Please enter Valid ISBN!" })
+        if (ISBNRegex.test(ISBN)) return res.status(400).send({ status: false, msg: "Please enter Valid ISBN!" })
 
         if (isValidDate.test(releasedAt)) return res.status(400).send({ status: false, msg: "Please enter releasedAt in the right format(YYYY-MM-DD)!" })
 
