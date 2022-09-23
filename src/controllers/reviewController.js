@@ -11,7 +11,7 @@ const isValidType = function (value) {
 };
 
 
-const createreviwe = async function (req, res) {
+const createreview = async function (req, res) {
   const book = req.params.bookId
 
   if (!mongoose.isValidObjectId(book)) return res.status(400).send({ status: false, msg: "provide valid bookId" })
@@ -157,4 +157,4 @@ const deletedReview = async function (req, res) {
 
 
 
-module.exports = { createreviwe, updatereviews,deletedReview }
+module.exports = { createreviwe: createreview, updatereviews,deletedReview }
