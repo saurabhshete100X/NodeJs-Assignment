@@ -4,10 +4,11 @@ const mongoose = require("mongoose")
 const reviweModel = require("../models/reviewModel")
 
 
+
 const createBooks = async function (req, res) {
     try {
         const ISBNRegex = /^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/
-        const isValidDate = /^\d{4}--(0[1-9]|1[012])--(0[1-9]|[12][0-9]|3[01])$/
+        const isValidDate = /^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))+$/
         data = req.body
 
         const { title, excerpt, userId, ISBN, category, subcategory, releasedAt, isDeleted } = data
@@ -123,13 +124,13 @@ const getallBooksById = async function (req, res) {
     }
 }
 
-// ***********************************************put api************************************************************************8
+// ***********************************************put api****************************************************************************
 
 const updatedocutment = async function (req, res) {
     try {
 
         const ISBNRegex = /^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/
-        const isValidDate = /^\d{4}\--(0[1-9]|1[012])\--(0[1-9]|[12][0-9]|3[01])$/
+        const isValidDate =/^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))+$/
 
         const bodydata = req.body
         let bookId = req.params.bookId
@@ -167,8 +168,9 @@ const updatedocutment = async function (req, res) {
         if (duplicateISBN) return res.status(400).send({ status: false, msg: "ISBN is already registered!" })
         if (!ISBNRegex.test(ISBN)) return res.status(400).send({ status: false, msg: "Please enter Valid ISBN!" })
         }
-        if (isValidDate.test(releasedAt)) return res.status(400).send({ status: false, msg: "Please enter releasedAt in the right format(YYYY-MM-DD)!" })
-
+         if(releasedAt){
+         if (!isValidDate.test(releasedAt)) return res.status(400).send({ status: false, msg: "Please enter releasedAt in the right format(YYYY-MM-DD)!" })
+         }
         const updateBook = await bookModel.findByIdAndUpdate({ _id: noData._id }, { $set: obj }, { new: true }) 
 
         return res.status(200).send({ satus: false, message: "book updated sucessfully", data: updateBook })
