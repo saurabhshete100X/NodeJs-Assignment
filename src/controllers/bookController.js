@@ -77,7 +77,7 @@ const getBooks = async function (req, res) {
         return res.status(200).send({ status: true, message: 'Books list', data: getallbooks })
 
     } catch (err) {
-        
+
         return res.status(500).send({ status: false, msg: "server error", error: err.message })
     }
 }
@@ -162,11 +162,11 @@ const updatedocutment = async function (req, res) {
         let duplicateTitle = await bookModel.findOne({ title })
         if (duplicateTitle) return res.status(400).send({ status: false, msg: "title is already registered!" })
 
-
+        if(ISBN){
         let duplicateISBN = await bookModel.findOne({ ISBN })
         if (duplicateISBN) return res.status(400).send({ status: false, msg: "ISBN is already registered!" })
-        if (ISBNRegex.test(ISBN)) return res.status(400).send({ status: false, msg: "Please enter Valid ISBN!" })
-
+        if (!ISBNRegex.test(ISBN)) return res.status(400).send({ status: false, msg: "Please enter Valid ISBN!" })
+        }
         if (isValidDate.test(releasedAt)) return res.status(400).send({ status: false, msg: "Please enter releasedAt in the right format(YYYY-MM-DD)!" })
 
         const updateBook = await bookModel.findByIdAndUpdate({ _id: noData._id }, { $set: obj }, { new: true }) 
@@ -179,7 +179,7 @@ const updatedocutment = async function (req, res) {
 }
 // ************************************************delete by id*****************************************************************
 
-const deletebook = async function (req, res) {
+const deletebook = async function (req,res) {
     try {
         const  bookId = req.params.bookId
 
