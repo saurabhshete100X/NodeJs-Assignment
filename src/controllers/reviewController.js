@@ -3,7 +3,7 @@ const reviewModel = require("../models/reviewModel")
 const mongoose = require("mongoose")
 
 
-const isValidType = function (value) {
+  const isValidType = function (value) {
   if (typeof value !== "string" || value.trim().length === 0) {
     return false;
   }
@@ -11,7 +11,11 @@ const isValidType = function (value) {
 };
 
 
-const createreview = async function (req, res) {
+ 
+
+const createreviwe = async function (req, res) {
+
+  try{
   const book = req.params.bookId
 
   if (!mongoose.isValidObjectId(book)) return res.status(400).send({ status: false, msg: "provide valid bookId" })
@@ -28,8 +32,14 @@ const createreview = async function (req, res) {
   result.bookId = exbook.id.toString()
 
   const { reviewedBy, rating, review, isDeleted } = data
-
-  if (!isValidType(reviewedBy)) return res.status(400).send({ status: false, msg: "type must be a string or required some data" })
+   if(reviewedBy){
+       
+    if(!reviewedBy){
+            result.reviewedBy = 'Guest'
+    }
+  if (typeof reviewedBy  !== "string" || reviewedBy.trim().length === 0) return res.status(400).send({ status: false, msg: "type must be a string or required some data" })
+ 
+   }
 
   result.reviewedBy = reviewedBy
 
@@ -39,6 +49,7 @@ const createreview = async function (req, res) {
     }
     result.isDeleted = isDeleted
   }
+  if(!rating)return res.status(400).send({status:false,msg:"rating is required filed"})
 
   if (typeof rating != "number") return res.status(400).send({ status: false, msg: "rating shoud be in number only" })
 
@@ -61,6 +72,11 @@ const createreview = async function (req, res) {
          
     return res.status(201).send({ status: true, message: "Success", data: findcr })
   }
+
+}
+catch (err){
+    return res.status(500).send({status:false,msg:"server" , error:err.message})
+}
 
 }
 // **********************************************************update review**************************************************************
@@ -94,8 +110,12 @@ const updatereviews = async function (req, res) {
 
       result.reviewedBy = reviewedBy
     }
-    if (rating) {
-      if (typeof rating != "number"||value.trim().length === 0) return res.status(400).send({ status: false, msg: "rating shoud be in number only" })
+
+    
+
+    if(rating){
+
+      if (typeof rating !== "number") return res.status(400).send({ status: false, msg: "rating shoud be in number only" })
 
       if (rating < 1 || rating > 5) return res.status(400).send({ status: false, msg: "rating should be between 1 to 5" })
 
@@ -115,7 +135,7 @@ const updatereviews = async function (req, res) {
 
   }
   catch (err) {
-    res.status(400).send({ status: false, msg: "server error", error: err.message })
+    res.status(500).send({ status: false, msg: "server error", error: err.message })
   }
 }
 
@@ -136,7 +156,7 @@ const deletedReview = async function (req, res) {
     if (!mongoose.isValidObjectId(reviweId)) return res.status(400).send({ status: false, msg: "provide valid reviweId" })
 
     const existreview = await bookModel.findOne({ _id: bookId, isDeleted: false })
-    if (!existreview) return res.status(404).send({ status: false, msg: "review not found" })
+    if (!existreview) return res.status(404).send({ status: false, msg: "book not found" })
 
     const deletedReviews = await reviewModel.findByIdAndUpdate({ _id: reviweId }, { $set: { isDeleted: true } }, { new: true })
 

@@ -84,7 +84,10 @@ const userLogin = async function (req, res) {
             }, 'project-3-group-36'
 
         )
-        res.status(201).send({ status: true, msg: 'token created successfully', data: token })
+        const decode = jwt.verify(token,'project-3-group-36')
+
+
+        res.status(201).send({ status: true, msg: 'token created successfully', data: decode,token })
 
     } catch (err) {
         return res.status(500).send({ status: false, Error: err.message })
