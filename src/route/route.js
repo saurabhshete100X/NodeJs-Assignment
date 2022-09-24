@@ -3,7 +3,7 @@ const route = express.Router()
 const {createUser, userLogin} = require("../controllers/userController")
 const {createBooks, getBooks, getallBooksById,updatedocutment,deletebook} = require("../controllers/bookController")
 const {authentication, authorisation1,authorisation2,} = require('../middleware/auth')
-const {createreviwe: createreview,updatereviews,deletedReview}  = require("../controllers/reviewController")
+const {createreview,updatereviews,deletedReview}  = require("../controllers/reviewController")
 
 // userapi
 route.post("/register" , createUser)
