@@ -101,6 +101,8 @@ const updatereviews = async function (req, res) {
     if (!existreview) return res.status(404).send({ status: false, msg: "review not found or deleted" })
 
     const data = req.body
+    
+    if(Object.keys(data).length === 0)return res.status(400).send({status:false,msg:"body must be given"})
 
     const { rating, review, reviewedBy } = data
 
