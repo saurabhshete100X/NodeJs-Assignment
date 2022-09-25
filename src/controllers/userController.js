@@ -21,49 +21,49 @@ const createUser = async function (req, res) {
 
         let { title, name, email, phone, password, address } = req.body  // Destructuring
 
-        if (Object.keys(req.body).length == 0) return res.status(400).send({ status: false, msg: "Please Provide Details" })
+        if (Object.keys(req.body).length == 0) return res.status(400).send({ status: false, message: "Please Provide Details" })
 
-        if (!title) return res.status(400).send({ status: false, msg: "Please Provide Title" })
+        if (!title) return res.status(400).send({ status: false, message: "Please Provide Title" })
         let titles = ["Mr", "Mrs", "Miss"]
-        if (!titles.includes(title)) return res.status(400).send({ status: false, msg: `Title should be among  ${titles} or space is not allowed` })
+        if (!titles.includes(title)) return res.status(400).send({ status: false, message: `Title should be among  ${titles} or space is not allowed` })
 
         if (name) {
-            if (!isValidType(name)) return res.status(400).send({ status: false, msg: "Name type must be a string or required some data" })
+            if (!isValidType(name)) return res.status(400).send({ status: false, message: "Name type must be a string or required some data" })
           }
 
 
-        if (!name) return res.status(400).send({ status: false, msg: "Please Provide Name" })
-        if (!nameRegex.test(name)) return res.status(400).send({ status: false, msg: "Please Provide Valid Name" })
+        if (!name) return res.status(400).send({ status: false, message: "Please Provide Name" })
+        if (!nameRegex.test(name)) return res.status(400).send({ status: false, message: "Please Provide Valid Name" })
 
 
-        if (!phone) return res.status(400).send({ status: false, msg: "Please Provide Mobile" })
-        if (!mobileRegex.test(phone)) return res.status(400).send({ status: false, msg: "Please Provide Valid Mobile" })
+        if (!phone) return res.status(400).send({ status: false, message: "Please Provide Mobile" })
+        if (!mobileRegex.test(phone)) return res.status(400).send({ status: false, message: "Please Provide Valid Mobile" })
 
         let duplicatePhone = await userModel.findOne({ phone })
-        if (duplicatePhone) return res.status(400).send({ status: false, msg: "phone is already registered!" })
+        if (duplicatePhone) return res.status(400).send({ status: false, message: "phone is already registered!" })
 
-        if (!email) return res.status(400).send({ status: false, msg: "Please Provide Email" })
-        if (!emailRegex.test(email)) return res.status(400).send({ status: false, msg: "Please Provide Valid Email" })
+        if (!email) return res.status(400).send({ status: false, message: "Please Provide Email" })
+        if (!emailRegex.test(email)) return res.status(400).send({ status: false, message: "Please Provide Valid Email" })
 
 
         let duplicateEmail = await userModel.findOne({ email })
-        if (duplicateEmail) return res.status(400).send({ status: false, msg: "email is already registered!" })
+        if (duplicateEmail) return res.status(400).send({ status: false, message: "email is already registered!" })
 
 
-        if (!password) return res.status(400).send({ status: false, msg: "Please Provide password" })
-        if (!passwordRegex.test(password)) return res.status(400).send({ status: false, msg: "Please Provide Valid password" })
+        if (!password) return res.status(400).send({ status: false, message: "Please Provide password" })
+        if (!passwordRegex.test(password)) return res.status(400).send({ status: false, message: "Please Provide Valid password" })
 
 
         if (address) {              // Nested If used here
-            if (Object.keys(address).length == 0) return res.status(400).send({ status: false, msg: "Please enter your address!" })
-            if (address.pincode.match(pincodeRegex)) return res.status(400).send({ status: false, msg: "Please Provide Valid Pincode" })
+            if (Object.keys(address).length == 0) return res.status(400).send({ status: false, message: "Please enter your address!" })
+            if (address.pincode.match(pincodeRegex)) return res.status(400).send({ status: false, message: "Please Provide Valid Pincode" })
         }
 
         const userCreation = await userModel.create(req.body)
         res.status(201).send({ status: true, message: 'Success', data: userCreation })
     }
     catch (error) {
-        res.status(500).send({ status: false, msg: error.message })
+        res.status(500).send({ status: false, message: error.message })
     }
 
 }
@@ -76,17 +76,17 @@ const userLogin = async function (req, res) {
         password = data.password
 
         if (Object.keys(data).length == 0) {
-            return res.status(400).send({ status: false, msg: 'please enter data' })
+            return res.status(400).send({ status: false, message: 'please enter data' })
         }
         if (!userName) {
-            return res.status(400).send({ status: false, msg: 'Email is required' })
+            return res.status(400).send({ status: false, message: 'Email is required' })
         }
         if (!password) {
-            return res.status(400).send({ status: false, msg: 'password is required' })
+            return res.status(400).send({ status: false, message: 'password is required' })
         }
         let user = await userModel.findOne({ email: userName, password: password })
         if (!user) {
-            return res.status(400).send({ status: false, msg: 'username or password incorrect' })
+            return res.status(400).send({ status: false, message: 'username or password incorrect' })
         }
         let token = jwt.sign(
             {
@@ -99,7 +99,7 @@ const userLogin = async function (req, res) {
         const decode = jwt.verify(token,'project-3-group-36')
 
 
-        res.status(201).send({ status: true, msg: 'token created successfully', data: decode,token })
+        res.status(201).send({ status: true, message: 'token created successfully', data: decode,token })
 
     } catch (err) {
         return res.status(500).send({ status: false, Error: err.message })
