@@ -28,7 +28,9 @@ const authorisation1 = async function (req, res, next) {
         data = req.body
         const userId = data.userId
 
-        if (Object.keys(data).length == 0) return res.status(400).send({ status: false, msg: "body required" })
+        if (Object.keys(data).length == 0) return res.status(400).send({ status: false, msg: "Please Provide Some Data" })
+
+        if(!userId) return res.status(400).send({ status: false, msg: 'Please Provide UserId' })
 
         if (!mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).send({ status: false, msg: 'user id is not valid' })

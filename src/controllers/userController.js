@@ -1,6 +1,14 @@
 const userModel = require("../models/userModel")
 const jwt = require('jsonwebtoken')
 
+const isValidType = function (value) {
+    if (typeof value !== "string" || value.trim().length === 0) {
+      return false;
+    }
+    return true;
+  };
+  
+
 
 const createUser = async function (req, res) {
     try {
@@ -18,6 +26,10 @@ const createUser = async function (req, res) {
         if (!title) return res.status(400).send({ status: false, msg: "Please Provide Title" })
         let titles = ["Mr", "Mrs", "Miss"]
         if (!titles.includes(title)) return res.status(400).send({ status: false, msg: `Title should be among  ${titles} or space is not allowed` })
+
+        if (name) {
+            if (!isValidType(name)) return res.status(400).send({ status: false, msg: "Name type must be a string or required some data" })
+          }
 
 
         if (!name) return res.status(400).send({ status: false, msg: "Please Provide Name" })
@@ -67,7 +79,7 @@ const userLogin = async function (req, res) {
             return res.status(400).send({ status: false, msg: 'please enter data' })
         }
         if (!userName) {
-            return res.status(400).send({ status: false, msg: 'username is required' })
+            return res.status(400).send({ status: false, msg: 'Email is required' })
         }
         if (!password) {
             return res.status(400).send({ status: false, msg: 'password is required' })
