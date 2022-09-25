@@ -33,12 +33,7 @@ const createreviwe = async function (req, res) {
 
   const { reviewedBy, rating, review, isDeleted } = data
    if(reviewedBy){
-       
-    if(!reviewedBy){
-            result.reviewedBy = 'Guest'
-    }
-  if (typeof reviewedBy  !== "string" || reviewedBy.trim().length === 0) return res.status(400).send({ status: false, msg: "type must be a string or required some data" })
- 
+  if (!isValidType(reviewedBy)) return res.status(400).send({ status: false, msg: "type must be a string or required some data" })
    }
 
   result.reviewedBy = reviewedBy
@@ -63,14 +58,15 @@ const createreviwe = async function (req, res) {
   result.reviewedAt = new Date()
 
   const createdreviews = await reviewModel.create(result)
-  const findcr = await reviewModel.findById(createdreviews._id).select({ _id: 1, bookId: 1, reviewedBy: 1, reviewedAt: 1, rating: 1 })
+  const reviewsData = await reviewModel.findById(createdreviews._id).select({_id: 1 ,bookId: 1, reviewedBy: 1, reviewedAt: 1, rating: 1})
 
-  if (findcr) {
+  if (reviewsData) {
     const updatebook = await bookModel.findOneAndUpdate(
-      { _id: createdreviews.bookId, isDeleted: false }, { $inc: { reviews: 1 } }, { new: true }
-    )
-         
-    return res.status(201).send({ status: true, message: "Success", data: findcr })
+      { _id: createdreviews.bookId, isDeleted: false }, { $inc: { reviews: 1 } }, { new: true })
+
+      
+        
+    return res.status(201).send({ status:true, message: "Review creation is successful", data:reviewsData})
   }
 
 }
@@ -112,9 +108,6 @@ const updatereviews = async function (req, res) {
 
       result.reviewedBy = reviewedBy
     }
-
-    
-
     if(rating){
 
       if (typeof rating !== "number") return res.status(400).send({ status: false, msg: "rating shoud be in number only" })
@@ -132,7 +125,7 @@ const updatereviews = async function (req, res) {
     const updateReview = await reviewModel.findByIdAndUpdate({ _id: reviewId }, { $set: result }, { new: true }).select({ _id: 1, bookId: 1, reviewedBy: 1, reviewedAt: 1, rating: 1, review: 1 });
 
     
-      return res.status(200).send({ status: true, message: "Success", data: updateReview });
+      return res.status(200).send({ status: true, message: "Success", data: updateReview._id });
     
 
   }
@@ -157,15 +150,15 @@ const deletedReview = async function (req, res) {
 
     if (!mongoose.isValidObjectId(reviweId)) return res.status(400).send({ status: false, msg: "provide valid reviweId" })
 
-    const existreview = await bookModel.findOne({ _id: bookId, isDeleted: false })
-    if (!existreview) return res.status(404).send({ status: false, msg: "book not found" })
-
+    const existreview = await reviewModel.findOne({ _id: reviweId, isDeleted: false })
+    if (!existreview) return res.status(404).send({ status: false, msg: "review not found" })
+    
     const deletedReviews = await reviewModel.findByIdAndUpdate({ _id: reviweId }, { $set: { isDeleted: true } }, { new: true })
 
     if (deletedReviews) {
       const updateBookReview = await bookModel.findOneAndUpdate(
         { _id:bookId, isDeleted: false }, { $inc: { reviews: -1 } }, { new: true }
-      )
+        )
       return res.status(200).send({ status: true, message: 'Success', data: updateBookReview })
     }
   } catch (err) {
