@@ -230,7 +230,7 @@ const deletebook = async function (req, res) {
 
         const updateBook = await bookModel.findOneAndUpdate({ _id: bookId }, { isDeleted: true, deletedAt: new Date() }, { new: true })
 
-        return res.status(200).send({ status: true, message: "data deleted sucessfully" })
+        return res.status(200).send({ status: true, message:"data deleted sucessfully" })
     }
     catch (err) {
         return res.status(500).send({ status: false, msg: "server error", error: err.message })
