@@ -13,7 +13,7 @@ const mongoose = require("mongoose")
 
  
 
-const createreviwe = async function (req, res) {
+const createreview = async function (req, res) {
 
   try{
   const book = req.params.bookId
@@ -169,4 +169,4 @@ const deletedReview = async function (req, res) {
 
 
 
-module.exports = { createreviwe, updatereviews,deletedReview }
+module.exports = { createreview, updatereviews,deletedReview }
