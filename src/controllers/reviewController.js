@@ -39,7 +39,7 @@ const createreview = async function (req, res) {
     result.reviewedBy = reviewedBy
 
     if (isDeleted) {
-      if (typeof isDeleted !== "boolean") {
+      if (typeof isDeleted != "boolean") {
         return res.status(400).send({ status: false, message: "isDeleted type must be boolean" })
       }
       result.isDeleted = isDeleted
@@ -61,7 +61,7 @@ const createreview = async function (req, res) {
     result.reviewedAt = new Date()
 
     const createdreviews = await reviewModel.create(result)
-    const reviewsData = await reviewModel.findById(createdreviews._id).select({ _id: 1, bookId: 1, reviewedBy: 1, reviewedAt: 1, rating: 1, review: 1 })
+    const reviewsData = await reviewModel.findById(createdreviews._id).select({ _id: 1, bookId: 1, reviewedBy: 1, reviewedAt: 1, rating: 1, review: 1,isDeleted:1 })
 
     if (reviewsData) {
       const updatebook = await bookModel.findOneAndUpdate(

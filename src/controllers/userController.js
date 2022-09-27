@@ -55,7 +55,7 @@ const createUser = async function (req, res) {
 
 
         if (address) {              // Nested If used here
-            if (Object.keys(address).length == 0) return res.status(400).send({ status: false, message: "Please enter your address!" })
+            if(typeof address !== "object")return res.status(400).send({status:false,msg:"address should be in Object"})
             if (address.pincode.match(pincodeRegex)) return res.status(400).send({ status: false, message: "Please Provide Valid Pincode" })
         }
 
