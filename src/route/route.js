@@ -5,29 +5,36 @@ const {createBooks, getBooks, getallBooksById,updatedocutment,deletebook} = requ
 const {authentication, authorisation1,authorisation2,} = require('../middleware/auth')
 const {createreview,updatereviews,deletedReview}  = require("../controllers/reviewController")
 
-// userapi
+/// userapi
 route.post("/register" , createUser)
 
 route.post("/login" , userLogin)
 
-// Bookapi
+// protected routes
+// route.get("/users", authentication, authorisation1, getUsers);
 
-route.post("/books",authentication,authorisation1,createBooks)
+// route.put("/users/:userId", authentication, authorisation1, updateUser);
 
-route.get("/books",authentication ,getBooks)
+// route.delete("/users/:userId", authentication, authorisation1, deleteUser);
 
-route.get("/books/:bookId",authentication, getallBooksById)
+// // Bookapi
 
-route.put("/books/:bookId",authentication,authorisation2,updatedocutment)
+// route.post("/books",authentication,authorisation1,createBooks)
 
-route.delete("/books/:bookId",authentication,authorisation2,deletebook)
+// route.get("/books",authentication ,getBooks)
 
-// reviewapi
-route.post("/books/:bookId/review",createreview)
+// route.get("/books/:bookId",authentication, getallBooksById)
 
-route.put ("/books/:bookId/review/:reviewId",updatereviews)
+// route.put("/books/:bookId",authentication,authorisation2,updatedocutment)
 
-route.delete("/books/:bookId/review/:reviewId",deletedReview)
+// route.delete("/books/:bookId",authentication,authorisation2,deletebook)
+
+// // reviewapi
+// route.post("/books/:bookId/review",createreview)
+
+// route.put ("/books/:bookId/review/:reviewId",updatereviews)
+
+// route.delete("/books/:bookId/review/:reviewId",deletedReview)
 
 
 
